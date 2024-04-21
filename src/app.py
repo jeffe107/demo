@@ -26,7 +26,7 @@ max_samples = len(temp_data['sample'].unique())
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CERULEAN])
 server = app.server in src/app.py
-app.title = "BIgMAG"
+app.title = "BIgMAG_demo"
 
 app.layout = html.Div([
         html.Div(
