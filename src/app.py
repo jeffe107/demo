@@ -19,9 +19,11 @@ labels_GTDB_Tk2 = labels_GTDB_Tk2()
 data = 'data/final_df.tsv'
 
 def read_data():
-    return pd.read_csv(data, sep='\t')
+    return pd.read_csv(data, sep='\t', index_col=0)
 temp_data = read_data()
 max_samples = len(temp_data['sample'].unique())
+temp_data['id'] = temp_data['sample']
+temp_data.set_index('id', inplace=True, drop=False)
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CERULEAN])
 server = app.server
@@ -281,7 +283,7 @@ app.layout = html.Div([
                                                                     marks={1:{'label':'One sample', 'style':{'font-size':'20px'}},
                                                                            max_samples:{'label':'All samples', 'style':{'font-size':'20px'}}},
                                                                     tooltip={"placement": "bottom", "always_visible": True,
-                                                                             "style": {"color": "black", "fontSize": "20px"}},
+                                                                             "style": {"fontSize": "20px"}},
                                                                     allowCross=False, vertical=True,
                                                                     id='GTDB-Tk2-slider')
                                                     ],
@@ -305,7 +307,7 @@ app.layout = html.Div([
                                                     {"label": label_GTDB_Tk2, "value": label_GTDB_Tk2}
                                                     for label_GTDB_Tk2 in labels_GTDB_Tk2
                                                 ],
-                                                value="Species",
+                                                value="Genus",
                                                 clearable=False,
                                                 className="dropdown",
                                                 style={'width':'500px'}
@@ -344,7 +346,51 @@ app.layout = html.Div([
                         ],                    
                 width=12,
                 )
-            ])
+            ]),
+            dbc.Row([
+                dbc.Col(
+                    children=[
+                        html.Div(
+                            children=[
+                            html.Div(
+                                children=[
+                                    html.P(children="Explore your data:",
+                                           className="slider-title")
+                                    ]
+                                ),
+                            html.Div(
+                                children=[
+                                        html.Div(
+                                        children=dash_table.DataTable(
+                                                                    id='datatable-row-ids',
+                                                                    columns=[
+                                                                        {'name': i, 'id': i, 'deletable': True} for i in temp_data.columns
+                                                                        # omit the id column
+                                                                        if i != 'id'
+                                                                    ],
+                                                                    data=temp_data.to_dict('records'),
+                                                                    editable=True,
+                                                                    filter_action="native",
+                                                                    sort_action="native",
+                                                                    sort_mode='multi',
+                                                                    row_selectable='multi',
+                                                                    row_deletable=True,
+                                                                    selected_rows=[],
+                                                                    page_action='native',
+                                                                    page_current= 0,
+                                                                    page_size= 20,
+                                                                    style_table={'overflowX': 'auto'}
+                                        ),
+                                        className="card",
+                                    )
+                                ],
+                                className="wrapper",
+                            )   
+                        ], className="card"),
+                        ],                    
+                width=12,
+                )
+            ]),
         ])
         
 
@@ -405,7 +451,7 @@ def update_figure_busco(busco_param, tax_level):
         showlegend=True,
     )
     
-    fig.update_layout(legend={'x':1.12,'y':0.5})
+    fig.update_layout(legend={'x':1.17,'y':0.5})
     fig.add_annotation(x=1.25, y=1.07,
                        xref='paper',
                        yref='paper',
@@ -475,7 +521,7 @@ def update_figure_checkm2(checkm2_param, tax_level):
         showlegend=True,
     )
     
-    fig.update_layout(legend={'x':1.12,'y':0.5})
+    fig.update_layout(legend={'x':1.17,'y':0.5})
     fig.add_annotation(x=1.25, y=1.07,
                        xref='paper',
                        yref='paper',
@@ -685,7 +731,7 @@ def update_gtdb_tk2(gtdbtk_parameter, tax_level):
         
         highlight_label = 'Unclassified'
         color_unclassified = 'red'
-        color_all = 'black'
+        color_all = 'dark blue'
         text_colors = [f"<span style='color:{str(color_unclassified)}'> {str(highlight_label)} </span>" if label == highlight_label else f"<span style='color:{str(color_all)}'> {str(label)} </span>" for label in final_df.index]
         fig.update_layout(xaxis=dict(ticktext=text_colors, tickmode='array', tickvals=list(range(data.shape[0]))))
         
