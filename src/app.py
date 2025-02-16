@@ -31,7 +31,7 @@ temp_data.set_index('id', inplace=True, drop=False)
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CERULEAN])
 server = app.server
-app.title = "BIgMAG_demo"
+app.title = "BIgMAG"
 
 app.layout = html.Div([
         html.Div(
